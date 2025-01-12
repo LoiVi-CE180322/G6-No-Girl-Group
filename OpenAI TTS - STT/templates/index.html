@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Speech to Text and Text to Speech</title>
+</head>
+<body>
+    <h1>Speech to Text</h1>
+    <form id="transcription-form" action="/transcribe" method="post" enctype="multipart/form-data">
+        <input type="file" name="audio_file" accept="audio/*">
+        <button type="submit">Transcribe</button>
+    </form>
+    <h2>Transcribed Text:</h2>
+    <div id="transcription-result"></div>
+
+    <h1>Text to Speech</h1>
+    <form id="synthesis-form" action="/synthesize" method="post">
+        <textarea name="text_to_speak" rows="4" cols="50"></textarea><br>
+        <button type="submit">Synthesize</button>
+    </form>
+    <h2>Speech Output:</h2>
+    <audio id="audio-player" controls></audio>
+
+    <script>
+        document.getElementById('transcription-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            fetch('/transcribe', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('transcription-result').innerText = data.transcript;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        document.getElementById('synthesis-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            fetch('/synthesize', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                var audioURL = URL.createObjectURL(blob);
+                var audioPlayer = document.getElementById('audio-player');
+                audioPlayer.src = audioURL;
+                audioPlayer.play();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
